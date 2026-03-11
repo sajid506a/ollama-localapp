@@ -3,9 +3,13 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 import os
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 df = pd.read_csv("realistic_restaurant_reviews.csv")
-embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+embeddings = OllamaEmbeddings(model="mxbai-embed-large", base_url=ollama_base_url)
 db_location = "./chroma_realistic_restaurant_reviews_db"
 add_documents =  not os.path.exists(db_location)
 if add_documents:

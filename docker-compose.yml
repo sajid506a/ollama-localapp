@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    container_name: restaurant-app
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    stdin_open: true # Allows interaction
+    tty: true       # Allows interaction
+    volumes:
+      - ./chroma_realistic_restaurant_reviews_db:/app/chroma_realistic_restaurant_reviews_db
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_storage:/root/.ollama
+    restart: unless-stopped
+
+  # Helper service to ensure models are pulled
+  ollama-pull-llm:
+    image: ollama/ollama:latest
+    container_name: ollama-pull-llm
+    depends_on:
+      - ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "sleep 5; ollama pull llama3.2"
+
+  ollama-pull-embeddings:
+    image: ollama/ollama:latest
+    container_name: ollama-pull-embeddings
+    depends_on:
+      - ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "sleep 5; ollama pull mxbai-embed-large"
+
+volumes:
+  ollama_storage:
